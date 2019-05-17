@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 
-B = pd.read_csv("C://Users/TIMUR/Desktop/master's/Python_task/new_events.txt", skiprows=1,sep='  ',header=None)
+B = pd.read_csv("new_events.txt", skiprows=1,sep='  ',header=None)
 B = B[[1, 2, 3, 4, 7]].values
-A = np.loadtxt("C:\\Users\TIMUR\Desktop\master's\Python_task\quasi.txt")
+A = np.loadtxt("quasi.txt")
 key = A[0][0]
 timestep,i,klast,lengthB,Alength=0,0,0,len(B),len(A)
 
