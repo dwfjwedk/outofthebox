@@ -1,0 +1,73 @@
+import numpy as np
+import pandas as pd
+import matplotlib
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
+
+B = pd.read_csv("C://Users/TIMUR/Desktop/master's/Python_task/new_events.txt", skiprows=1,sep='  ',header=None)
+B = B[[1, 2, 3, 4, 7]].values
+A = np.loadtxt("C:\\Users\TIMUR\Desktop\master's\Python_task\quasi.txt")
+key = A[0][0]
+timestep,i,klast,lengthB,Alength=0,0,0,len(B),len(A)
+
+while i<=Alength:
+    if A[i][0] == key:
+        fig = plt.figure()
+        ax = Axes3D(fig)
+        time, flength, clength = A[i][1], A[i][2], A[i][3]
+        n = int(flength / clength)+1
+        pressure, tipup, tipbottom, avopening = [], [], [], []
+        timestep+=1
+
+        for k in range(1, n+1, 1):
+            pressure.append(A[i + k][0])
+            avopening.append(A[i + k][1])
+            tipup.append(A[i+k][2])
+            tipbottom.append(A[i+k][3])
+
+        for k in range(0, n):
+            cracky=[tipbottom[k],tipbottom[k],tipup[k],tipup[k]]
+            crackx=[clength*k,clength*(k+1),clength*(k+1),clength*k]
+
+            Z = np.array(
+                [[clength * k, tipbottom[k], -avopening[k] / 2], [clength * k, tipup[k], -avopening[k] / 2],
+                 [clength * (k + 1), tipup[k], -avopening[k] / 2],
+                 [clength * (k + 1), tipbottom[k], -avopening[k] / 2],
+                 [clength * k, tipbottom[k], avopening[k] / 2], [clength * k, tipup[k], avopening[k] / 2],
+                 [clength * (k + 1), tipup[k], avopening[k] / 2],
+                 [clength * (k + 1), tipbottom[k], avopening[k] / 2]])
+
+            ax.scatter3D(Z[:, 0], Z[:, 1], Z[:, 2])
+            verts = [[Z[0], Z[1], Z[2], Z[3]],
+                     [Z[4], Z[5], Z[6], Z[7]],
+                     [Z[0], Z[1], Z[5], Z[4]],
+                     [Z[2], Z[3], Z[7], Z[6]],
+                     [Z[1], Z[2], Z[6], Z[5]],
+                     [Z[4], Z[7], Z[3], Z[0]],
+                     [Z[2], Z[3], Z[7], Z[6]]]
+            ax.add_collection3d(Poly3DCollection(verts,facecolors='y', edgecolors='b', linewidths=0.05, alpha=0.1))
+
+        for k in range(klast+1,lengthB):
+            if B[k,0]>timestep:break
+
+        klast = k-1
+        events = ax.scatter3D(B[:klast, 1], B[:klast, 2], B[:klast, 3], s=abs(B[:klast, 4]) * 5, c=B[:klast, 0], cmap='viridis')
+        cbar = fig.colorbar(events, ticks=np.arange(0,timestep))
+        plt.title('Crack spreading')
+        plt.grid()
+        ax.set_zlim3d(-0.1, 0.1)
+        plt.axis([-50, 200, -30, 30])
+        ax.set_xlabel('fracture length')
+        ax.set_ylabel('fracture width')
+        ax.set_zlabel('fracture opening')
+
+        fig.savefig('timestep' + str(timestep) + '.png', format='png', dpi=1000)
+        print('We are now in', str(timestep), 'timestep(of 22 timesteps). Flength is', flength, '. Time moment is',time)
+        i += n + 1
+        if i>=Alength:break
+        plt.close()
+    else:
+        i += 1
+plt.show()
+
